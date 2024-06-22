@@ -1,4 +1,4 @@
-import { DNSAnswer, DNSHeader, DNSQuestion } from './message';
+import { DNSAnswer, DNSHeader, DNSQuestion } from './types';
 
 export class DNSParser {
 	public header(buffer: Buffer): DNSHeader {

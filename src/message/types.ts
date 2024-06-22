@@ -56,7 +56,7 @@ export interface DNSHeader {
 // MINFO           14 mailbox or mail list information
 // MX              15 mail exchange
 // TXT             16 text strings
-export enum TYPE {
+export enum RECORD_TYPE {
 	A = 1,
 	NS = 2,
 	MD = 3,
@@ -78,7 +78,7 @@ export enum TYPE {
 export interface DNSQuestion {
 	NAME: string; // The domain name, encoded as a sequence of labels. Each label consists of a length octet followed by that number of octets. The domain name is terminated with a length of 0. -- variable length
 
-	TYPE: TYPE; // Type of the query -- 2 bytes integer 16 bits
+	TYPE: RECORD_TYPE; // Type of the query -- 2 bytes integer 16 bits
 
 	CLASS: 1; // Class of the query -- 2 bytes integer 16 bits -- usually set to 1 for internet addresses
 }
@@ -86,7 +86,7 @@ export interface DNSQuestion {
 export interface DNSAnswer {
 	NAME: string; // The domain name, encoded as a sequence of labels. Each label consists of a length octet followed by that number of octets. The domain name is terminated with a length of 0. -- variable length
 
-	TYPE: TYPE; // Type of the query -- 2 bytes integer 16 bits
+	TYPE: RECORD_TYPE; // Type of the query -- 2 bytes integer 16 bits
 
 	CLASS: 1; // Class of the query -- 2 bytes integer 16 bits -- usually set to 1 for internet addresses
 
@@ -99,7 +99,7 @@ export interface DNSAnswer {
 
 export interface DNSObject {
 	header: DNSHeader;
-	questions: DNSQuestion;
+	questions: DNSQuestion[];
 	answers?: DNSAnswer[];
 }
 
