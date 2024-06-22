@@ -1,12 +1,14 @@
 import * as dgram from 'node:dgram';
 import { dnsParser } from './message/parser';
-import { DNSObject, RECORD_TYPE } from './message/types';
+import { DNSObject, QRIndicator, RECORD_TYPE } from './message/types';
 import { DNSBuilder } from './message/builder';
 
 const udpSocket: dgram.Socket = dgram.createSocket('udp4');
 udpSocket.bind(2053, '127.0.0.1');
 
-udpSocket.on('message', async (data: Buffer, remoteAddr: dgram.RemoteInfo) => {
+console.log('UDP server is running on port 2053');
+
+udpSocket.on('message', (data: Buffer, remoteAddr: dgram.RemoteInfo) => {
 	try {
 		const reqHeaderPacket = dnsParser.header(data);
 		const { questions: reqQuestionPacket } = dnsParser.questionAndAnswer(data);
@@ -32,22 +34,28 @@ udpSocket.on('message', async (data: Buffer, remoteAddr: dgram.RemoteInfo) => {
 		const responseObject: DNSObject = {
 			header: {
 				...reqHeaderPacket,
-				QR: 1,
+				QR: QRIndicator.RESPONSE,
+				QDCOUNT: reqHeaderPacket.QDCOUNT,
+				ANCOUNT: reqQuestionPacket.length,
 			},
 			questions: reqQuestionPacket,
-			answers: [
-				{
-					NAME: 'example.com',
+			answers: reqQuestionPacket.map((question) => {
+				return {
+					NAME: question.NAME,
 					CLASS: 1,
-					RDATA: Buffer.from([192, 168, 1, 1]),
-					RDLENGTH: 4,
-					TTL: 60,
+					TTL: 300,
 					TYPE: RECORD_TYPE.A,
-				},
-			],
+					RDLENGTH: 4,
+					RDATA: Buffer.from([192, 168, 1, 1]),
+				};
+			}),
 		};
+
 		const dnsBuilder = new DNSBuilder(responseObject);
 		const response = dnsBuilder.toBuffer();
+
+		console.log(`Sending response to ${remoteAddr.address}:${remoteAddr.port}`);
+
 		udpSocket.send(response, remoteAddr.port, remoteAddr.address);
 	} catch (e) {
 		console.error(`Error sending data: ${e}`);

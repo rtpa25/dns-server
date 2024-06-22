@@ -3,7 +3,8 @@
 	"version": "1.0.0",
 	"description": "This is a demo DNS server using Node.js & Typescript",
 	"scripts": {
-		"test": "echo \"Error: no test specified\" && exit 1"
+		"test": "jest",
+		"dev": "ts-node src/udp-server.ts"
 	},
 	"keywords": [],
 	"author": {
@@ -13,9 +14,11 @@
 	},
 	"license": "ISC",
 	"devDependencies": {
+		"@types/jest": "^29.5.12",
 		"@types/node": "^20.14.2",
 		"jest": "^29.7.0",
 		"ts-jest": "^29.1.5",
 		"typescript": "^5.4.5"
 	}
 }
+
