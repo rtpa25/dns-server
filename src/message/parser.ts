@@ -24,12 +24,20 @@ export class DNSParser {
 	public questionAndAnswer(buffer: Buffer): {
 		questions: DNSQuestion[];
 		answers: DNSAnswer[];
+		authority: DNSAnswer[];
+		additional: DNSAnswer[];
 	} {
 		let offset = 12;
+
 		const questions: DNSQuestion[] = [];
 		const answers: DNSAnswer[] = [];
+		const authority: DNSAnswer[] = [];
+		const additional: DNSAnswer[] = [];
+
 		const questionsCount = buffer.readUInt16BE(4);
 		const answersCount = buffer.readUInt16BE(6);
+		const authorityCount = buffer.readUInt16BE(8);
+		const additionalCount = buffer.readUInt16BE(10);
 
 		for (let i = 0; i < questionsCount; i++) {
 			let domainName = '';
@@ -123,7 +131,105 @@ export class DNSParser {
 			answers.push(answer);
 		}
 
-		return { questions, answers };
+		for (let i = 0; i < authorityCount; i++) {
+			let domainName = '';
+			let jumped = false;
+			let jumpOffset = -1;
+
+			while (true) {
+				const labelLength = buffer.readUInt8(offset);
+
+				// Check if the labelLength indicates a pointer
+				// If the first two bits of labelLength are 11 (0xc0), it indicates a pointer.
+				if ((labelLength & 0xc0) === 0xc0) {
+					if (!jumped) {
+						jumpOffset = offset + 2;
+					}
+					offset = ((labelLength & 0x3f) << 8) | buffer.readUInt8(offset + 1);
+					jumped = true;
+				} else {
+					if (labelLength === 0) {
+						offset++;
+						break;
+					}
+
+					offset++;
+					domainName +=
+						buffer.toString('utf8', offset, offset + labelLength) + '.';
+					offset += labelLength;
+				}
+			}
+
+			if (jumped) {
+				offset = jumpOffset;
+			}
+
+			domainName = domainName.slice(0, -1);
+			const answer: DNSAnswer = {
+				NAME: domainName,
+				TYPE: buffer.readUInt16BE(offset),
+				CLASS: buffer.readUInt16BE(offset + 2) as 1,
+				TTL: buffer.readUInt32BE(offset + 4),
+				RDLENGTH: buffer.readUInt16BE(offset + 8),
+				RDATA: buffer.subarray(
+					offset + 10,
+					offset + 10 + buffer.readUInt16BE(offset + 8),
+				),
+			};
+			offset += 10 + buffer.readUInt16BE(offset + 8);
+			authority.push(answer);
+		}
+
+		for (let i = 0; i < additionalCount; i++) {
+			let domainName = '';
+			let jumped = false;
+			let jumpOffset = -1;
+
+			while (true) {
+				const labelLength = buffer.readUInt8(offset);
+
+				// Check if the labelLength indicates a pointer
+				// If the first two bits of labelLength are 11 (0xc0), it indicates a pointer.
+				if ((labelLength & 0xc0) === 0xc0) {
+					if (!jumped) {
+						jumpOffset = offset + 2;
+					}
+					offset = ((labelLength & 0x3f) << 8) | buffer.readUInt8(offset + 1);
+					jumped = true;
+				} else {
+					if (labelLength === 0) {
+						offset++;
+						break;
+					}
+
+					offset++;
+					domainName +=
+						buffer.toString('utf8', offset, offset + labelLength) + '.';
+					offset += labelLength;
+				}
+			}
+
+			if (jumped) {
+				offset = jumpOffset;
+			}
+
+			domainName = domainName.slice(0, -1);
+			const answer: DNSAnswer = {
+				NAME: domainName,
+				TYPE: buffer.readUInt16BE(offset),
+				CLASS: buffer.readUInt16BE(offset + 2) as 1,
+				TTL: buffer.readUInt32BE(offset + 4),
+				RDLENGTH: buffer.readUInt16BE(offset + 8),
+				RDATA: buffer.subarray(
+					offset + 10,
+					offset + 10 + buffer.readUInt16BE(offset + 8),
+				),
+			};
+			offset += 10 + buffer.readUInt16BE(offset + 8);
+			additional.push(answer);
+		}
+
+		return { questions, answers, authority, additional };
 	}
 }
 

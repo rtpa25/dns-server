@@ -101,5 +101,7 @@ export interface DNSObject {
 	header: DNSHeader;
 	questions: DNSQuestion[];
 	answers?: DNSAnswer[];
+	authority?: DNSAnswer[];
+	additional?: DNSAnswer[];
 }
 

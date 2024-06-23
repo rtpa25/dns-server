@@ -16,8 +16,10 @@ export async function forwardResolver(
 				const message = dnsParser.questionAndAnswer(data);
 				const response: DNSObject = {
 					header,
-					questions: message.questions,
 					answers: message.answers,
+					questions: message.questions,
+					authority: message.authority,
+					additional: message.additional,
 				};
 				socket.close();
 				resolve(response);

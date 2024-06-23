@@ -1,0 +1,42 @@
+{
+  "header": {
+    "ID": 1234,
+    "QR": 1,
+    "OPCODE": 0,
+    "AA": 0,
+    "TC": 0,
+    "RD": 1,
+    "RA": 1,
+    "Z": 0,
+    "RCODE": 0,
+    "QDCOUNT": 1,
+    "ANCOUNT": 1,
+    "NSCOUNT": 0,
+    "ARCOUNT": 0
+  },
+  "questions": [
+    {
+      "NAME": "goole.com",
+      "TYPE": 1,
+      "CLASS": 1
+    }
+  ],
+  "answers": [
+    {
+      "NAME": "goole.com",
+      "TYPE": 1,
+      "CLASS": 1,
+      "TTL": 3600,
+      "RDLENGTH": 4,
+      "RDATA": {
+        "type": "Buffer",
+        "data": [
+          217,
+          160,
+          0,
+          201
+        ]
+      }
+    }
+  ]
+}
