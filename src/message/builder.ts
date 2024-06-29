@@ -4,7 +4,8 @@ export class DNSBuilder {
 	constructor(private dnsObject: DNSObject) {}
 
 	public toBuffer(): Buffer {
-		const { header, questions, answers } = this.dnsObject;
+		const { header, questions, answers, additional, authority } =
+			this.dnsObject;
 		try {
 			//#region  //*=========== Compute buffer allocation size ===========
 			//#region  //*=========== question buffer size ===========
@@ -34,6 +35,34 @@ export class DNSBuilder {
 				allocSize += aBuffSize;
 			}
 			//#endregion  //*======== answer buffer size ===========
+			//#region  //*=========== authority buffer size ===========
+			if (authority) {
+				let aBuffSize = 0;
+				for (const answer of authority) {
+					aBuffSize += 10; // 2 bytes for TYPE, 2 bytes for CLASS, 4 bytes for TTL, 2 bytes for RDLENGTH
+					answer.NAME.split('.').forEach((label: string) => {
+						aBuffSize += label.length + 1; // same lable logic as question
+					});
+					aBuffSize++; // for the terminating 0
+					aBuffSize += answer.RDLENGTH; // for RDATA as RDLENGTH is the indicator of how long RDATA is
+				}
+				allocSize += aBuffSize;
+			}
+			//#endregion  //*======== authority buffer size ===========
+			//#region  //*=========== additional buffer size ===========
+			if (additional) {
+				let aBuffSize = 0;
+				for (const answer of additional) {
+					aBuffSize += 10; // 2 bytes for TYPE, 2 bytes for CLASS, 4 bytes for TTL, 2 bytes for RDLENGTH
+					answer.NAME.split('.').forEach((label: string) => {
+						aBuffSize += label.length + 1; // same lable logic as question
+					});
+					aBuffSize++; // for the terminating 0
+					aBuffSize += answer.RDLENGTH; // for RDATA as RDLENGTH is the indicator of how long RDATA is
+				}
+				allocSize += aBuffSize;
+			}
+			//#endregion  //*======== additional buffer size ===========
 			//#endregion  //*======== Compute buffer allocation size ===========
 
 			const response: Buffer = Buffer.alloc(allocSize);
@@ -97,6 +126,54 @@ export class DNSBuilder {
 				}
 			}
 			//#endregion  //*======== Populate answer ===========
+
+			// #region  //*=========== Populate authority ===========
+			if (authority) {
+				for (const answer of authority) {
+					answer.NAME.split('.').forEach((label: string) => {
+						response.writeUInt8(label.length, offset++);
+						response.write(label, offset);
+						offset += label.length;
+					}); // write the domain name
+					response.writeUInt8(0, offset++); // write the terminating 0
+
+					response.writeUInt16BE(answer.TYPE, offset);
+					offset += 2;
+					response.writeUInt16BE(answer.CLASS, offset);
+					offset += 2;
+					response.writeUInt32BE(answer.TTL, offset);
+					offset += 4;
+					response.writeUInt16BE(answer.RDLENGTH, offset);
+					offset += 2;
+					answer.RDATA.copy(response, offset); // write the RDATA buffer
+					offset += answer.RDATA.length; // Move offset by the length of RDATA
+				}
+			}
+			// #endregion  //*======== Populate authority ===========
+
+			// #region  //*=========== Populate additional ===========
+			if (additional) {
+				for (const answer of additional) {
+					answer.NAME.split('.').forEach((label: string) => {
+						response.writeUInt8(label.length, offset++);
+						response.write(label, offset);
+						offset += label.length;
+					}); // write the domain name
+					response.writeUInt8(0, offset++); // write the terminating 0
+
+					response.writeUInt16BE(answer.TYPE, offset);
+					offset += 2;
+					response.writeUInt16BE(answer.CLASS, offset);
+					offset += 2;
+					response.writeUInt32BE(answer.TTL, offset);
+					offset += 4;
+					response.writeUInt16BE(answer.RDLENGTH, offset);
+					offset += 2;
+					answer.RDATA.copy(response, offset); // write the RDATA buffer
+					offset += answer.RDATA.length; // Move offset by the length of RDATA
+				}
+			}
+			// #endregion  //*======== Populate additional ===========
 			return response;
 		} catch (error) {
 			return Buffer.alloc(0);
