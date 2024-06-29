@@ -1,0 +1,82 @@
+{
+  "header": {
+    "ID": 1234,
+    "QR": 1,
+    "OPCODE": 0,
+    "AA": 1,
+    "TC": 0,
+    "RD": 1,
+    "RA": 0,
+    "Z": 0,
+    "RCODE": 0,
+    "QDCOUNT": 1,
+    "ANCOUNT": 2,
+    "NSCOUNT": 0,
+    "ARCOUNT": 0
+  },
+  "answers": [
+    {
+      "NAME": "ronit.dev",
+      "TYPE": 2,
+      "CLASS": 1,
+      "TTL": 86400,
+      "RDLENGTH": 24,
+      "RDATA": {
+        "type": "Buffer",
+        "data": [
+          4,
+          103,
+          114,
+          101,
+          103,
+          2,
+          110,
+          115,
+          10,
+          99,
+          108,
+          111,
+          117,
+          100,
+          102,
+          108,
+          97,
+          114,
+          101,
+          3,
+          99,
+          111,
+          109,
+          0
+        ]
+      }
+    },
+    {
+      "NAME": "ronit.dev",
+      "TYPE": 2,
+      "CLASS": 1,
+      "TTL": 86400,
+      "RDLENGTH": 8,
+      "RDATA": {
+        "type": "Buffer",
+        "data": [
+          5,
+          107,
+          104,
+          108,
+          111,
+          101,
+          192,
+          44
+        ]
+      }
+    }
+  ],
+  "questions": [
+    {
+      "NAME": "ronit.dev",
+      "TYPE": 2,
+      "CLASS": 1
+    }
+  ]
+}
