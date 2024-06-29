@@ -37,7 +37,7 @@ test('valid DNS request with A record and sigle question', async () => {
 		},
 		questions: [
 			{
-				NAME: 'goole.com',
+				NAME: 'learn.piyushgarg.dev',
 				TYPE: RECORD_TYPE.A,
 				CLASS: 1,
 			},

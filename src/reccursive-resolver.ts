@@ -48,7 +48,22 @@ export async function recursiveLookup(question: DNSQuestion) {
 
 		// if find answer return and end loop
 		if (dnsResponse.answers && dnsResponse.answers.length > 0) {
-			return dnsResponse.answers;
+			const answers = dnsResponse.answers;
+			const cnameAnswers = answers.filter(
+				(answer) => answer.TYPE === RECORD_TYPE.CNAME,
+			);
+			if (cnameAnswers.length > 0 && question.TYPE !== RECORD_TYPE.CNAME) {
+				for (const cnameAnswer of cnameAnswers) {
+					const cnameQuestion: DNSQuestion = {
+						NAME: decodeRDATA(cnameAnswer.RDATA),
+						TYPE: RECORD_TYPE.A,
+						CLASS: 1,
+					};
+					const cnameAnswers = await recursiveLookup(cnameQuestion);
+					answers.push(...cnameAnswers);
+				}
+			}
+			return answers;
 		}
 
 		// if find additional use those ip and continue the loop in hope that you will get the answer

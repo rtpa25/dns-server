@@ -10,31 +10,63 @@
     "Z": 0,
     "RCODE": 0,
     "QDCOUNT": 1,
-    "ANCOUNT": 1,
+    "ANCOUNT": 2,
     "NSCOUNT": 0,
     "ARCOUNT": 0
   },
   "questions": [
     {
-      "NAME": "goole.com",
+      "NAME": "learn.piyushgarg.dev",
       "TYPE": 1,
       "CLASS": 1
     }
   ],
   "answers": [
     {
-      "NAME": "goole.com",
+      "NAME": "learn.piyushgarg.dev",
+      "TYPE": 5,
+      "CLASS": 1,
+      "TTL": 60,
+      "RDLENGTH": 20,
+      "RDATA": {
+        "type": "Buffer",
+        "data": [
+          5,
+          99,
+          110,
+          97,
+          109,
+          101,
+          8,
+          116,
+          101,
+          97,
+          99,
+          104,
+          121,
+          115,
+          116,
+          3,
+          99,
+          111,
+          109,
+          0
+        ]
+      }
+    },
+    {
+      "NAME": "cname.teachyst.com",
       "TYPE": 1,
       "CLASS": 1,
-      "TTL": 3600,
+      "TTL": 14400,
       "RDLENGTH": 4,
       "RDATA": {
         "type": "Buffer",
         "data": [
-          217,
-          160,
-          0,
-          201
+          76,
+          76,
+          21,
+          21
         ]
       }
     }
