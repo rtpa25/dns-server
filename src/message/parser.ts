@@ -61,7 +61,39 @@ export class DNSParser {
 		return [domainName, offsetCopy];
 	}
 
-	// can be split into multiple functions, because of dynamic offset of each section
+	private decodeQuestion(
+		buffer: Buffer,
+		offset: number,
+	): [DNSQuestion, number] {
+		let [domainName, jumpOffset] = this.decodeDomainName(buffer, offset);
+		offset = jumpOffset;
+		const question: DNSQuestion = {
+			NAME: domainName,
+			TYPE: buffer.readUInt16BE(offset),
+			CLASS: buffer.readUInt16BE(offset + 2) as 1,
+		};
+		offset += 4;
+		return [question, offset];
+	}
+
+	private decodeAnswer(buffer: Buffer, offset: number): [DNSAnswer, number] {
+		let [domainName, jumpOffset] = this.decodeDomainName(buffer, offset);
+		offset = jumpOffset;
+		const answer: DNSAnswer = {
+			NAME: domainName,
+			TYPE: buffer.readUInt16BE(offset),
+			CLASS: buffer.readUInt16BE(offset + 2) as 1,
+			TTL: buffer.readUInt32BE(offset + 4),
+			RDLENGTH: buffer.readUInt16BE(offset + 8),
+			RDATA: buffer.subarray(
+				offset + 10,
+				offset + 10 + buffer.readUInt16BE(offset + 8),
+			),
+		};
+		offset += 10 + buffer.readUInt16BE(offset + 8);
+		return [answer, offset];
+	}
+
 	public questionAndAnswer(buffer: Buffer): {
 		questions: DNSQuestion[];
 		answers: DNSAnswer[];
@@ -82,76 +114,26 @@ export class DNSParser {
 		const additionalCount = buffer.readUInt16BE(10);
 
 		for (let i = 0; i < questionsCount; i++) {
-			let [domainName, jumpOffset] = this.decodeDomainName(buffer, offset);
-
-			offset = jumpOffset;
-
-			const question: DNSQuestion = {
-				NAME: domainName,
-				TYPE: buffer.readUInt16BE(offset),
-				CLASS: buffer.readUInt16BE(offset + 2) as 1,
-			};
-			offset += 4;
+			let [question, newOffset] = this.decodeQuestion(buffer, offset);
+			offset = newOffset;
 			questions.push(question);
 		}
 
 		for (let i = 0; i < answersCount; i++) {
-			let [domainName, jumpOffset] = this.decodeDomainName(buffer, offset);
-
-			offset = jumpOffset;
-
-			const answer: DNSAnswer = {
-				NAME: domainName,
-				TYPE: buffer.readUInt16BE(offset),
-				CLASS: buffer.readUInt16BE(offset + 2) as 1,
-				TTL: buffer.readUInt32BE(offset + 4),
-				RDLENGTH: buffer.readUInt16BE(offset + 8),
-				RDATA: buffer.subarray(
-					offset + 10,
-					offset + 10 + buffer.readUInt16BE(offset + 8),
-				),
-			};
-			offset += 10 + buffer.readUInt16BE(offset + 8);
+			let [answer, newOffset] = this.decodeAnswer(buffer, offset);
+			offset = newOffset;
 			answers.push(answer);
 		}
 
 		for (let i = 0; i < authorityCount; i++) {
-			let [domainName, jumpOffset] = this.decodeDomainName(buffer, offset);
-
-			offset = jumpOffset;
-
-			const answer: DNSAnswer = {
-				NAME: domainName,
-				TYPE: buffer.readUInt16BE(offset),
-				CLASS: buffer.readUInt16BE(offset + 2) as 1,
-				TTL: buffer.readUInt32BE(offset + 4),
-				RDLENGTH: buffer.readUInt16BE(offset + 8),
-				RDATA: buffer.subarray(
-					offset + 10,
-					offset + 10 + buffer.readUInt16BE(offset + 8),
-				),
-			};
-			offset += 10 + buffer.readUInt16BE(offset + 8);
+			let [answer, newOffset] = this.decodeAnswer(buffer, offset);
+			offset = newOffset;
 			authority.push(answer);
 		}
 
 		for (let i = 0; i < additionalCount; i++) {
-			let [domainName, jumpOffset] = this.decodeDomainName(buffer, offset);
-
-			offset = jumpOffset;
-
-			const answer: DNSAnswer = {
-				NAME: domainName,
-				TYPE: buffer.readUInt16BE(offset),
-				CLASS: buffer.readUInt16BE(offset + 2) as 1,
-				TTL: buffer.readUInt32BE(offset + 4),
-				RDLENGTH: buffer.readUInt16BE(offset + 8),
-				RDATA: buffer.subarray(
-					offset + 10,
-					offset + 10 + buffer.readUInt16BE(offset + 8),
-				),
-			};
-			offset += 10 + buffer.readUInt16BE(offset + 8);
+			let [answer, newOffset] = this.decodeAnswer(buffer, offset);
+			offset = newOffset;
 			additional.push(answer);
 		}
 
