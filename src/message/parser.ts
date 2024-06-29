@@ -21,12 +21,54 @@ export class DNSParser {
 		return headerObject;
 	}
 
+	private decodeDomainName(buffer: Buffer, offset: number): [string, number] {
+		let domainName = '';
+		let jumped = false;
+		let jumpOffset = -1;
+		let offsetCopy = offset;
+
+		while (true) {
+			const labelLength = buffer.readUInt8(offsetCopy);
+
+			// Check if the labelLength indicates a pointer
+			// If the first two bits of labelLength are 11 (0xc0)[11000000 in binary], it indicates a pointer.
+			if ((labelLength & 0xc0) === 0xc0) {
+				if (!jumped) {
+					jumpOffset = offsetCopy + 2;
+				}
+				offsetCopy =
+					((labelLength & 0x3f) << 8) | buffer.readUInt8(offsetCopy + 1);
+				jumped = true;
+			} else {
+				if (labelLength === 0) {
+					offsetCopy++;
+					break;
+				}
+
+				offsetCopy++;
+				domainName +=
+					buffer.toString('utf8', offsetCopy, offsetCopy + labelLength) + '.';
+				offsetCopy += labelLength;
+			}
+		}
+
+		if (jumped) {
+			offsetCopy = jumpOffset;
+		}
+
+		domainName = domainName.slice(0, -1);
+
+		return [domainName, offsetCopy];
+	}
+
+	// can be split into multiple functions, because of dynamic offset of each section
 	public questionAndAnswer(buffer: Buffer): {
 		questions: DNSQuestion[];
 		answers: DNSAnswer[];
 		authority: DNSAnswer[];
 		additional: DNSAnswer[];
 	} {
+		// header always takes up the first 12 bytes
 		let offset = 12;
 
 		const questions: DNSQuestion[] = [];
@@ -40,39 +82,10 @@ export class DNSParser {
 		const additionalCount = buffer.readUInt16BE(10);
 
 		for (let i = 0; i < questionsCount; i++) {
-			let domainName = '';
-			let jumped = false;
-			let jumpOffset = -1;
+			let [domainName, jumpOffset] = this.decodeDomainName(buffer, offset);
 
-			while (true) {
-				const labelLength = buffer.readUInt8(offset);
+			offset = jumpOffset;
 
-				// Check if the labelLength indicates a pointer
-				// If the first two bits of labelLength are 11 (0xc0)[11000000 in binary], it indicates a pointer.
-				if ((labelLength & 0xc0) === 0xc0) {
-					if (!jumped) {
-						jumpOffset = offset + 2;
-					}
-					offset = ((labelLength & 0x3f) << 8) | buffer.readUInt8(offset + 1);
-					jumped = true;
-				} else {
-					if (labelLength === 0) {
-						offset++;
-						break;
-					}
-
-					offset++;
-					domainName +=
-						buffer.toString('utf8', offset, offset + labelLength) + '.';
-					offset += labelLength;
-				}
-			}
-
-			if (jumped) {
-				offset = jumpOffset;
-			}
-
-			domainName = domainName.slice(0, -1);
 			const question: DNSQuestion = {
 				NAME: domainName,
 				TYPE: buffer.readUInt16BE(offset),
@@ -83,39 +96,10 @@ export class DNSParser {
 		}
 
 		for (let i = 0; i < answersCount; i++) {
-			let domainName = '';
-			let jumped = false;
-			let jumpOffset = -1;
+			let [domainName, jumpOffset] = this.decodeDomainName(buffer, offset);
 
-			while (true) {
-				const labelLength = buffer.readUInt8(offset);
+			offset = jumpOffset;
 
-				// Check if the labelLength indicates a pointer
-				// If the first two bits of labelLength are 11 (0xc0), it indicates a pointer.
-				if ((labelLength & 0xc0) === 0xc0) {
-					if (!jumped) {
-						jumpOffset = offset + 2;
-					}
-					offset = ((labelLength & 0x3f) << 8) | buffer.readUInt8(offset + 1);
-					jumped = true;
-				} else {
-					if (labelLength === 0) {
-						offset++;
-						break;
-					}
-
-					offset++;
-					domainName +=
-						buffer.toString('utf8', offset, offset + labelLength) + '.';
-					offset += labelLength;
-				}
-			}
-
-			if (jumped) {
-				offset = jumpOffset;
-			}
-
-			domainName = domainName.slice(0, -1);
 			const answer: DNSAnswer = {
 				NAME: domainName,
 				TYPE: buffer.readUInt16BE(offset),
@@ -132,39 +116,10 @@ export class DNSParser {
 		}
 
 		for (let i = 0; i < authorityCount; i++) {
-			let domainName = '';
-			let jumped = false;
-			let jumpOffset = -1;
+			let [domainName, jumpOffset] = this.decodeDomainName(buffer, offset);
 
-			while (true) {
-				const labelLength = buffer.readUInt8(offset);
+			offset = jumpOffset;
 
-				// Check if the labelLength indicates a pointer
-				// If the first two bits of labelLength are 11 (0xc0), it indicates a pointer.
-				if ((labelLength & 0xc0) === 0xc0) {
-					if (!jumped) {
-						jumpOffset = offset + 2;
-					}
-					offset = ((labelLength & 0x3f) << 8) | buffer.readUInt8(offset + 1);
-					jumped = true;
-				} else {
-					if (labelLength === 0) {
-						offset++;
-						break;
-					}
-
-					offset++;
-					domainName +=
-						buffer.toString('utf8', offset, offset + labelLength) + '.';
-					offset += labelLength;
-				}
-			}
-
-			if (jumped) {
-				offset = jumpOffset;
-			}
-
-			domainName = domainName.slice(0, -1);
 			const answer: DNSAnswer = {
 				NAME: domainName,
 				TYPE: buffer.readUInt16BE(offset),
@@ -181,39 +136,10 @@ export class DNSParser {
 		}
 
 		for (let i = 0; i < additionalCount; i++) {
-			let domainName = '';
-			let jumped = false;
-			let jumpOffset = -1;
+			let [domainName, jumpOffset] = this.decodeDomainName(buffer, offset);
 
-			while (true) {
-				const labelLength = buffer.readUInt8(offset);
+			offset = jumpOffset;
 
-				// Check if the labelLength indicates a pointer
-				// If the first two bits of labelLength are 11 (0xc0), it indicates a pointer.
-				if ((labelLength & 0xc0) === 0xc0) {
-					if (!jumped) {
-						jumpOffset = offset + 2;
-					}
-					offset = ((labelLength & 0x3f) << 8) | buffer.readUInt8(offset + 1);
-					jumped = true;
-				} else {
-					if (labelLength === 0) {
-						offset++;
-						break;
-					}
-
-					offset++;
-					domainName +=
-						buffer.toString('utf8', offset, offset + labelLength) + '.';
-					offset += labelLength;
-				}
-			}
-
-			if (jumped) {
-				offset = jumpOffset;
-			}
-
-			domainName = domainName.slice(0, -1);
 			const answer: DNSAnswer = {
 				NAME: domainName,
 				TYPE: buffer.readUInt16BE(offset),
