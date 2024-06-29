@@ -237,8 +237,10 @@ test('invalid domain should give an NXDOMAIN rcode in header', async () => {
 
 		udpSocket.on('message', (data: Buffer) => {
 			try {
-				const { RCODE } = dnsParser.header(data);
+				const { RCODE, ANCOUNT, NSCOUNT } = dnsParser.header(data);
 				expect(RCODE).toEqual(RCode.NXDOMAIN);
+				expect(ANCOUNT).toEqual(0);
+				expect(NSCOUNT).toEqual(1);
 
 				const { authority, answers } = dnsParser.questionAndAnswer(data);
 
