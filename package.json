@@ -4,7 +4,8 @@
 	"description": "This is a demo DNS server using Node.js & Typescript",
 	"scripts": {
 		"test": "jest",
-		"dev": "dotenv -- tsx watch src/udp-server.ts"
+		"dev:udp": "dotenv -- tsx watch src/udp-server.ts",
+		"dev:http": "dotenv -- tsx watch src/http-server.ts"
 	},
 	"keywords": [],
 	"author": {

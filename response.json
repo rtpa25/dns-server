@@ -1,6 +1,6 @@
 {
   "header": {
-    "ID": 1234,
+    "ID": 58322,
     "QR": 1,
     "OPCODE": 0,
     "AA": 1,
@@ -10,38 +10,36 @@
     "Z": 0,
     "RCODE": 0,
     "QDCOUNT": 1,
-    "ANCOUNT": 2,
+    "ANCOUNT": 5,
     "NSCOUNT": 0,
     "ARCOUNT": 0
   },
   "answers": [
     {
-      "NAME": "ronit.dev",
-      "TYPE": 2,
+      "NAME": "dimension.dev",
+      "TYPE": 15,
       "CLASS": 1,
-      "TTL": 86400,
-      "RDLENGTH": 24,
+      "TTL": 3600,
+      "RDLENGTH": 22,
       "RDATA": {
         "type": "Buffer",
         "data": [
-          4,
-          103,
-          114,
-          101,
-          103,
-          2,
-          110,
-          115,
-          10,
-          99,
-          108,
-          111,
-          117,
-          100,
-          102,
-          108,
+          0,
+          1,
+          5,
           97,
-          114,
+          115,
+          112,
+          109,
+          120,
+          1,
+          108,
+          6,
+          103,
+          111,
+          111,
+          103,
+          108,
           101,
           3,
           99,
@@ -52,30 +50,94 @@
       }
     },
     {
-      "NAME": "ronit.dev",
-      "TYPE": 2,
+      "NAME": "dimension.dev",
+      "TYPE": 15,
       "CLASS": 1,
-      "TTL": 86400,
-      "RDLENGTH": 8,
+      "TTL": 3600,
+      "RDLENGTH": 9,
       "RDATA": {
         "type": "Buffer",
         "data": [
-          5,
-          107,
-          104,
+          0,
+          10,
+          4,
+          97,
           108,
-          111,
-          101,
+          116,
+          51,
           192,
-          44
+          45
+        ]
+      }
+    },
+    {
+      "NAME": "dimension.dev",
+      "TYPE": 15,
+      "CLASS": 1,
+      "TTL": 3600,
+      "RDLENGTH": 9,
+      "RDATA": {
+        "type": "Buffer",
+        "data": [
+          0,
+          10,
+          4,
+          97,
+          108,
+          116,
+          52,
+          192,
+          45
+        ]
+      }
+    },
+    {
+      "NAME": "dimension.dev",
+      "TYPE": 15,
+      "CLASS": 1,
+      "TTL": 3600,
+      "RDLENGTH": 9,
+      "RDATA": {
+        "type": "Buffer",
+        "data": [
+          0,
+          5,
+          4,
+          97,
+          108,
+          116,
+          49,
+          192,
+          45
+        ]
+      }
+    },
+    {
+      "NAME": "dimension.dev",
+      "TYPE": 15,
+      "CLASS": 1,
+      "TTL": 3600,
+      "RDLENGTH": 9,
+      "RDATA": {
+        "type": "Buffer",
+        "data": [
+          0,
+          5,
+          4,
+          97,
+          108,
+          116,
+          50,
+          192,
+          45
         ]
       }
     }
   ],
   "questions": [
     {
-      "NAME": "ronit.dev",
-      "TYPE": 2,
+      "NAME": "dimension.dev",
+      "TYPE": 15,
       "CLASS": 1
     }
   ]
