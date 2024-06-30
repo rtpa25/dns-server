@@ -1,6 +1,7 @@
 import { forwardResolver } from './forward-resolver';
 import { DNSBuilder } from './message/builder';
 import {
+	Bool,
 	DNSAnswer,
 	DNSHeader,
 	DNSObject,
@@ -41,6 +42,11 @@ export async function recursiveLookup(
 
 			// id response is giving an error of NXDOMAIN then return the response
 			if (dnsResponse.header.RCODE === RCode.NXDOMAIN) {
+				return dnsResponse;
+			}
+
+			// if further recursion is not available then return the response
+			if (dnsResponse.header.RA === Bool.FALSE) {
 				return dnsResponse;
 			}
 
