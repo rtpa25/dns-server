@@ -45,11 +45,6 @@ export async function recursiveLookup(
 				return dnsResponse;
 			}
 
-			// if further recursion is not available then return the response
-			if (dnsResponse.header.RA === Bool.FALSE) {
-				return dnsResponse;
-			}
-
 			// if find answer return and end loop
 			if (dnsResponse.answers && dnsResponse.answers.length > 0) {
 				const answers = dnsResponse.answers;
@@ -113,6 +108,21 @@ export async function recursiveLookup(
 						}
 					});
 				validAuthorityRecord = getRandomEntry(validAuthorityRecords);
+
+				// if validAuthorityRecord is a SOA record then return the response with SOA record
+				if (validAuthorityRecord.TYPE === RECORD_TYPE.SOA) {
+					return {
+						header: {
+							...header,
+							QR: QRIndicator.RESPONSE,
+							RCODE: RCode.NXDOMAIN,
+							NSCOUNT: dnsResponse.authority ? dnsResponse.authority.length : 0,
+						},
+						questions: [question],
+						authority: dnsResponse.authority || [],
+						answers: [],
+					} as DNSObject;
+				}
 			}
 
 			if (validAuthorityRecord) {

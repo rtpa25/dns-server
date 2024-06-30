@@ -33,6 +33,7 @@ app.get('/resolve', (req, res) => {
 	try {
 		const parsed = resolveSchema.safeParse(req.query);
 		if (!parsed.success) {
+			console.error(parsed.error);
 			return res.status(400).send(parsed.error.message);
 		}
 
@@ -40,10 +41,11 @@ app.get('/resolve', (req, res) => {
 
 		resolveDNS(type, domain, (err, records) => {
 			if (err) {
-				return res.status(500).send(err.message);
+				console.error(err);
+				return res.status(500).json(err.message);
 			}
 
-			res.status(200).json(records);
+			return res.status(200).json(records);
 		});
 	} catch (error) {
 		console.error(error);
