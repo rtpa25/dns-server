@@ -1,17 +1,22 @@
 import { DNSAnswer, DNSQuestion } from './message/types';
 import { Redis } from '@upstash/redis';
+import { decodeRDATA } from './utils';
 
 export class DNSCache {
 	constructor(private redis: Redis) {}
 
 	async set(question: DNSQuestion, answers: DNSAnswer[]) {
 		try {
+			if (answers.length === 0) {
+				return;
+			}
+
 			const baseKey = `${question.NAME}/${question.TYPE}`;
 			await this.redis.set(baseKey, { count: answers.length });
 
 			const promises: Promise<DNSAnswer | 'OK' | null>[] = [];
 			for (const answer of answers) {
-				const key = `${baseKey}:${answer.RDATA}`;
+				const key = `${baseKey}:${decodeRDATA(answer.RDATA)}`;
 				promises.push(
 					this.redis.set(key, answer, {
 						ex: answer.TTL,
@@ -48,6 +53,10 @@ export class DNSCache {
 		}
 
 		return answers;
+	}
+
+	async deleteAll() {
+		await this.redis.flushdb();
 	}
 }
 
