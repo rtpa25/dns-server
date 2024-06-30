@@ -1,11 +1,20 @@
 import express from 'express';
-import { RECORD_TYPE } from './message/types';
-import { isValidDomain } from './utils';
 import dns from 'node:dns';
 import { z } from 'zod';
+import { isValidDomain } from './utils';
 
 const app = express();
 const resolver = new dns.Resolver();
+
+enum REQUEST_RECORD_TYPES {
+	A = 'A',
+	NS = 'NS',
+	CNAME = 'CNAME',
+	SOA = 'SOA',
+	PTR = 'PTR',
+	MX = 'MX',
+	TXT = 'TXT',
+}
 
 resolver.setServers(['127.0.0.1:2053']);
 
@@ -17,24 +26,21 @@ const resolveSchema = z.object({
 	domain: z.string().refine(isValidDomain, {
 		message: 'Invalid domain',
 	}),
-	type: z.string().refine((val) => parseInt(val) in RECORD_TYPE, {
-		message: 'Invalid record type',
-	}),
+	type: z.nativeEnum(REQUEST_RECORD_TYPES),
 });
 
 app.get('/resolve', (req, res) => {
 	try {
 		const parsed = resolveSchema.safeParse(req.query);
-		if (parsed.error && !parsed.data) {
-			res.status(400).send(parsed.error.errors);
+		if (!parsed.success) {
+			return res.status(400).send(parsed.error.message);
 		}
 
-		const { domain, type } = parsed.data!;
+		const { domain, type } = parsed.data;
 
-		resolveDNS(parseInt(type), domain, (err, records) => {
+		resolveDNS(type, domain, (err, records) => {
 			if (err) {
-				res.status(500).send(err.message);
-				return;
+				return res.status(500).send(err.message);
 			}
 
 			res.status(200).json(records);
@@ -50,31 +56,30 @@ app.listen(8080, () => {
 });
 
 function resolveDNS(
-	recordType: RECORD_TYPE,
+	recordType: REQUEST_RECORD_TYPES,
 	domain: string,
 	callback: (err: NodeJS.ErrnoException | null, addresses: any) => void,
 ) {
-	console.log('recordType', recordType);
 	switch (recordType) {
-		case 1:
+		case REQUEST_RECORD_TYPES.A:
 			resolver.resolve4(domain, callback);
 			break;
-		case RECORD_TYPE.CNAME:
+		case REQUEST_RECORD_TYPES.CNAME:
 			resolver.resolveCname(domain, callback);
 			break;
-		case RECORD_TYPE.MX:
+		case REQUEST_RECORD_TYPES.MX:
 			resolver.resolveMx(domain, callback);
 			break;
-		case RECORD_TYPE.TXT:
+		case REQUEST_RECORD_TYPES.TXT:
 			resolver.resolveTxt(domain, callback);
 			break;
-		case RECORD_TYPE.PTR:
+		case REQUEST_RECORD_TYPES.PTR:
 			resolver.resolvePtr(domain, callback);
 			break;
-		case RECORD_TYPE.NS:
+		case REQUEST_RECORD_TYPES.NS:
 			resolver.resolveNs(domain, callback);
 			break;
-		case RECORD_TYPE.SOA:
+		case REQUEST_RECORD_TYPES.SOA:
 			resolver.resolveSoa(domain, callback);
 			break;
 		default:
