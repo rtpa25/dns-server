@@ -19,6 +19,8 @@ udpSocket.on('message', async (data: Buffer, remoteAddr: dgram.RemoteInfo) => {
 		const reqHeaderPacket = dnsParser.header(data);
 		const { questions: reqQuestionPacket } = dnsParser.questionAndAnswer(data);
 
+		// await dnsCache.deleteAll();
+
 		if (reqQuestionPacket.length !== reqHeaderPacket.QDCOUNT) {
 			throw new Error(
 				'Question count does not match the number of questions found',
@@ -49,6 +51,7 @@ udpSocket.on('message', async (data: Buffer, remoteAddr: dgram.RemoteInfo) => {
 		// try to fetch from cache first
 		const cachedAnswers = await dnsCache.get(question);
 		if (cachedAnswers.length > 0) {
+			console.log('Using cached answers');
 			responseObject = {
 				header: {
 					...reqHeaderPacket,
@@ -59,7 +62,7 @@ udpSocket.on('message', async (data: Buffer, remoteAddr: dgram.RemoteInfo) => {
 				answers: cachedAnswers,
 			};
 		} else {
-			responseObject = await recursiveLookup(question);
+			responseObject = await recursiveLookup(question, reqHeaderPacket);
 			if (responseObject.answers)
 				await dnsCache.set(question, responseObject.answers);
 		}
