@@ -1,8 +1,8 @@
 import { forwardResolver } from './forward-resolver';
 import { DNSBuilder } from './message/builder';
 import {
-	Bool,
 	DNSAnswer,
+	DNSHeader,
 	DNSObject,
 	DNSQuestion,
 	QRIndicator,
@@ -12,7 +12,10 @@ import {
 import { rootNameServers } from './root-name-server';
 import { decodeRDATA, getRandomEntry, isValidDomain } from './utils';
 
-export async function recursiveLookup(question: DNSQuestion) {
+export async function recursiveLookup(
+	question: DNSQuestion,
+	header: DNSHeader,
+) {
 	try {
 		let rootNameServerIP = getRandomEntry(rootNameServers).ipv4;
 		const resolverPort = 53;
@@ -21,21 +24,7 @@ export async function recursiveLookup(question: DNSQuestion) {
 			let rootnameServerIPCopy = rootNameServerIP;
 
 			const requestObject: DNSObject = {
-				header: {
-					ID: 1234,
-					QR: QRIndicator.QUERY,
-					OPCODE: 0,
-					AA: Bool.FALSE,
-					TC: Bool.FALSE,
-					RD: Bool.TRUE,
-					RA: Bool.FALSE,
-					Z: 0,
-					RCODE: RCode.NOERROR,
-					QDCOUNT: 1,
-					ANCOUNT: 0,
-					NSCOUNT: 0,
-					ARCOUNT: 0,
-				},
+				header,
 				questions: [question],
 			};
 			const requestBuffer = new DNSBuilder(requestObject).toBuffer();
@@ -70,7 +59,7 @@ export async function recursiveLookup(question: DNSQuestion) {
 							TYPE: RECORD_TYPE.A,
 							CLASS: 1,
 						};
-						const res = await recursiveLookup(cnameQuestion);
+						const res = await recursiveLookup(cnameQuestion, header);
 						if (res.answers) answers.push(...res.answers);
 					}
 				}
@@ -121,11 +110,14 @@ export async function recursiveLookup(question: DNSQuestion) {
 			}
 
 			if (validAuthorityRecord) {
-				const res = await recursiveLookup({
-					NAME: validAuthorityRecord.NAME,
-					TYPE: RECORD_TYPE.A,
-					CLASS: validAuthorityRecord.CLASS,
-				});
+				const res = await recursiveLookup(
+					{
+						NAME: validAuthorityRecord.NAME,
+						TYPE: RECORD_TYPE.A,
+						CLASS: validAuthorityRecord.CLASS,
+					},
+					header,
+				);
 
 				if (res.answers) {
 					const randomResponse = getRandomEntry(res.answers);
@@ -137,19 +129,10 @@ export async function recursiveLookup(question: DNSQuestion) {
 			// If no valid authority record or additional records found, return NXDOMAIN with SOA if possible
 			return {
 				header: {
-					ID: 1234,
+					...header,
 					QR: QRIndicator.RESPONSE,
-					OPCODE: 0,
-					AA: Bool.FALSE,
-					TC: Bool.FALSE,
-					RD: Bool.TRUE,
-					RA: Bool.FALSE,
-					Z: 0,
 					RCODE: RCode.NXDOMAIN,
-					QDCOUNT: 1,
-					ANCOUNT: 0,
 					NSCOUNT: dnsResponse.authority ? dnsResponse.authority.length : 0,
-					ARCOUNT: 0,
 				},
 				questions: [question],
 				authority: dnsResponse.authority || [],
@@ -160,19 +143,9 @@ export async function recursiveLookup(question: DNSQuestion) {
 		console.error('Error in recursiveLookup:', error);
 		return {
 			header: {
-				ID: 1234,
+				...header,
 				QR: QRIndicator.RESPONSE,
-				OPCODE: 0,
-				AA: Bool.FALSE,
-				TC: Bool.FALSE,
-				RD: Bool.TRUE,
-				RA: Bool.FALSE,
-				Z: 0,
 				RCODE: RCode.NXDOMAIN,
-				QDCOUNT: 1,
-				ANCOUNT: 0,
-				NSCOUNT: 0,
-				ARCOUNT: 0,
 			},
 			questions: [question],
 			authority: [],
