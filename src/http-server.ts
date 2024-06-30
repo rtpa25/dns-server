@@ -68,7 +68,6 @@ function resolveDNS(
 		case RECORD_TYPE.TXT:
 			resolver.resolveTxt(domain, callback);
 			break;
-			break;
 		case RECORD_TYPE.PTR:
 			resolver.resolvePtr(domain, callback);
 			break;

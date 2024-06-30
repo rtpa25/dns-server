@@ -5,7 +5,12 @@
 	"scripts": {
 		"test": "jest",
 		"dev:udp": "dotenv -- tsx watch src/udp-server.ts",
-		"dev:http": "dotenv -- tsx watch src/http-server.ts"
+		"dev:http": "dotenv -- tsx watch src/http-server.ts",
+		"dev": "pnpm run dev:http & pnpm run dev:udp",
+		"build": "tsc",
+		"start:http": "node dist/http-server.js",
+		"start:udp": "node dist/udp-server.js",
+		"start": "pnpm run start:http & pnpm run start:udp"
 	},
 	"keywords": [],
 	"author": {
