@@ -3,11 +3,16 @@ import * as fs from 'node:fs';
 import { DNSBuilder } from './message/builder';
 import { dnsParser } from './message/parser';
 import { recursiveLookup } from './reccursive-resolver';
+import { DNSCache } from './dns-cache';
+import { redis } from './redis';
+import { DNSObject } from './message/types';
 
 const udpSocket: dgram.Socket = dgram.createSocket('udp4');
 udpSocket.bind(2053, '127.0.0.1');
 
 console.log('UDP server is running on port 2053');
+
+const dnsCache = new DNSCache(redis);
 
 udpSocket.on('message', async (data: Buffer, remoteAddr: dgram.RemoteInfo) => {
 	try {
@@ -39,9 +44,26 @@ udpSocket.on('message', async (data: Buffer, remoteAddr: dgram.RemoteInfo) => {
 			throw new Error('No question found in the packet');
 		}
 
-		const responseObject = await recursiveLookup(question);
+		let responseObject: DNSObject;
 
-		console.log('final-result', JSON.stringify(responseObject, null, 2));
+		// try to fetch from cache first
+		const cachedAnswers = await dnsCache.get(question);
+		if (cachedAnswers.length > 0) {
+			responseObject = {
+				header: {
+					...reqHeaderPacket,
+					QR: 1,
+					ANCOUNT: cachedAnswers.length,
+				},
+				questions: [question],
+				answers: cachedAnswers,
+			};
+		} else {
+			responseObject = await recursiveLookup(question);
+			if (responseObject.answers)
+				await dnsCache.set(question, responseObject.answers);
+		}
+
 		fs.writeFileSync('response.json', JSON.stringify(responseObject, null, 2));
 
 		const dnsBuilder = new DNSBuilder(responseObject);
