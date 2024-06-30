@@ -48,7 +48,10 @@ export class DNSCache {
 		for (const key of keys) {
 			const answer = await this.redis.get<DNSAnswer>(key);
 			if (answer) {
-				answers.push(answer);
+				answers.push({
+					...answer,
+					RDATA: Buffer.from(answer.RDATA), // convert back to buffer
+				});
 			}
 		}
 

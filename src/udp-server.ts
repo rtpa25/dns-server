@@ -5,7 +5,7 @@ import { dnsParser } from './message/parser';
 import { recursiveLookup } from './reccursive-resolver';
 import { DNSCache } from './dns-cache';
 import { redis } from './redis';
-import { DNSObject } from './message/types';
+import { Bool, DNSObject, QRIndicator } from './message/types';
 
 const udpSocket: dgram.Socket = dgram.createSocket('udp4');
 udpSocket.bind(2053, '127.0.0.1');
@@ -18,8 +18,6 @@ udpSocket.on('message', async (data: Buffer, remoteAddr: dgram.RemoteInfo) => {
 	try {
 		const reqHeaderPacket = dnsParser.header(data);
 		const { questions: reqQuestionPacket } = dnsParser.questionAndAnswer(data);
-
-		// await dnsCache.deleteAll();
 
 		if (reqQuestionPacket.length !== reqHeaderPacket.QDCOUNT) {
 			throw new Error(
@@ -51,15 +49,17 @@ udpSocket.on('message', async (data: Buffer, remoteAddr: dgram.RemoteInfo) => {
 		// try to fetch from cache first
 		const cachedAnswers = await dnsCache.get(question);
 		if (cachedAnswers.length > 0) {
-			console.log('Using cached answers');
 			responseObject = {
 				header: {
 					...reqHeaderPacket,
-					QR: 1,
+					QR: QRIndicator.RESPONSE,
+					RA: Bool.TRUE,
 					ANCOUNT: cachedAnswers.length,
 				},
 				questions: [question],
 				answers: cachedAnswers,
+				additional: [],
+				authority: [],
 			};
 		} else {
 			responseObject = await recursiveLookup(question, reqHeaderPacket);
