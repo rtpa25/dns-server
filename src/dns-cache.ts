@@ -12,8 +12,11 @@ export class DNSCache {
 			}
 
 			const baseKey = `${question.NAME}/${question.TYPE}`;
-			await this.redis.set(baseKey, { count: answers.length });
-
+			await this.redis.del(baseKey);
+			await this.redis.rpush(
+				baseKey,
+				answers.map((a) => decodeRDATA(a.RDATA)),
+			);
 			const promises: Promise<DNSAnswer | 'OK' | null>[] = [];
 			for (const answer of answers) {
 				const key = `${baseKey}:${decodeRDATA(answer.RDATA)}`;
@@ -34,13 +37,21 @@ export class DNSCache {
 	async get(question: DNSQuestion): Promise<DNSAnswer[]> {
 		const baseKey = `${question.NAME}/${question.TYPE}`;
 
-		const cache = await this.redis.get<{ count: number }>(baseKey);
-		if (!cache) {
+		const [_cache] = await this.redis.lrange(baseKey, 0, -1); // get all elements in the list [[RDATA1, RDATA2, ...]]
+		if (!_cache) {
+			console.log('cache is empty');
+			return [];
+		}
+		const cache = _cache as unknown as string[]; // convert to string array
+
+		if (cache.length === 0) {
+			console.log('cache is empty');
 			return [];
 		}
 
 		const keys = await this.redis.keys(`${baseKey}:*`);
-		if (keys.length !== cache.count) {
+		if (keys.length !== cache.length) {
+			console.log('keys length does not match cache length', { keys, cache });
 			return [];
 		}
 
@@ -55,11 +66,29 @@ export class DNSCache {
 			}
 		}
 
-		return answers;
+		// cache which is a string array contains the RDATA of the answers, I need my answers array with the same order
+		// because in a DNS response, the order of the answers matters (first show CNAME then show underlying A for example)
+		return sortDNSAnswers(answers, cache);
 	}
 
 	async deleteAll() {
 		await this.redis.flushdb();
 	}
+}
+
+function sortDNSAnswers(answers: DNSAnswer[], cache: string[]): DNSAnswer[] {
+	return answers.sort((a, b) => {
+		const aIndex = cache.indexOf(decodeRDATA(a.RDATA));
+		const bIndex = cache.indexOf(decodeRDATA(b.RDATA));
+
+		if (aIndex === -1 || bIndex === -1) {
+			console.warn('RDATA not found in cache:', {
+				a: aIndex,
+				b: bIndex,
+			});
+		}
+
+		return aIndex - bIndex;
+	});
 }
 
