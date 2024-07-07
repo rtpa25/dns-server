@@ -39,7 +39,7 @@ export interface DNSHeader {
 	ARCOUNT: number; // Number of resource records in the additional records section --> 16 bits
 }
 
-//   TYPE            value and meaning
+// TYPE            value and meaning
 // A               1 a host address
 // NS              2 an authoritative name server
 // MD              3 a mail destination (Obsolete - use MX)

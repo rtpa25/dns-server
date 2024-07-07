@@ -1,9 +1,9 @@
-import { DNSObject } from './types';
+import { DNSAnswer, DNSObject } from './types';
 
 export class DNSBuilder {
 	constructor(private dnsObject: DNSObject) {}
 
-	private calculateSectionBufferSize(section: any[]): number {
+	private calculateSectionBufferSize(section: DNSAnswer[]): number {
 		let sectionBufferSize = 0;
 		for (const entry of section) {
 			sectionBufferSize += 10; // 2 bytes for TYPE, 2 bytes for CLASS, 4 bytes for TTL, 2 bytes for RDLENGTH
@@ -17,7 +17,7 @@ export class DNSBuilder {
 	}
 
 	private writeSectionToBuffer(
-		section: any[],
+		section: DNSAnswer[],
 		buffer: Buffer,
 		offset: number,
 	): number {
@@ -52,7 +52,7 @@ export class DNSBuilder {
 			additional = [],
 		} = this.dnsObject;
 		try {
-			//#region  //*=========== Compute buffer allocation size ===========
+			//#region  //*=========== Allocate buffer of required size in bytes ===========
 			const hBuffSize = 12;
 
 			//#region  //*=========== question buffer size ===========
@@ -75,6 +75,7 @@ export class DNSBuilder {
 			const allocSize =
 				hBuffSize + qBuffSize + aBuffSize + nsBuffSize + arBuffSize;
 			const response: Buffer = Buffer.alloc(allocSize);
+			//#endregion  //*======== Allocate buffer of required size in bytes ===========
 
 			//#region  //*=========== Populate header ===========
 			response.writeUInt16BE(header.ID, 0);

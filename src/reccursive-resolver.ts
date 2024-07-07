@@ -1,7 +1,6 @@
 import { forwardResolver } from './forward-resolver';
 import { DNSBuilder } from './message/builder';
 import {
-	Bool,
 	DNSAnswer,
 	DNSHeader,
 	DNSObject,

@@ -1,6 +1,6 @@
 {
   "header": {
-    "ID": 58322,
+    "ID": 44176,
     "QR": 1,
     "OPCODE": 0,
     "AA": 1,
@@ -8,137 +8,83 @@
     "RD": 1,
     "RA": 0,
     "Z": 0,
-    "RCODE": 0,
+    "RCODE": 3,
     "QDCOUNT": 1,
-    "ANCOUNT": 5,
-    "NSCOUNT": 0,
+    "ANCOUNT": 0,
+    "NSCOUNT": 1,
     "ARCOUNT": 0
   },
-  "answers": [
+  "answers": [],
+  "questions": [
     {
-      "NAME": "dimension.dev",
-      "TYPE": 15,
+      "NAME": "lambda.ronit.dev",
+      "TYPE": 5,
+      "CLASS": 1
+    }
+  ],
+  "authority": [
+    {
+      "NAME": "ronit.dev",
+      "TYPE": 6,
       "CLASS": 1,
-      "TTL": 3600,
-      "RDLENGTH": 22,
+      "TTL": 1800,
+      "RDLENGTH": 50,
       "RDATA": {
         "type": "Buffer",
         "data": [
-          0,
-          1,
-          5,
-          97,
+          4,
+          103,
+          114,
+          101,
+          103,
+          2,
+          110,
           115,
-          112,
-          109,
-          120,
-          1,
+          10,
+          99,
           108,
-          6,
-          103,
           111,
-          111,
-          103,
+          117,
+          100,
+          102,
           108,
+          97,
+          114,
           101,
           3,
           99,
           111,
           109,
-          0
-        ]
-      }
-    },
-    {
-      "NAME": "dimension.dev",
-      "TYPE": 15,
-      "CLASS": 1,
-      "TTL": 3600,
-      "RDLENGTH": 9,
-      "RDATA": {
-        "type": "Buffer",
-        "data": [
           0,
-          10,
-          4,
-          97,
-          108,
-          116,
-          51,
+          3,
+          100,
+          110,
+          115,
           192,
-          45
-        ]
-      }
-    },
-    {
-      "NAME": "dimension.dev",
-      "TYPE": 15,
-      "CLASS": 1,
-      "TTL": 3600,
-      "RDLENGTH": 9,
-      "RDATA": {
-        "type": "Buffer",
-        "data": [
+          54,
+          139,
+          164,
+          47,
+          56,
           0,
-          10,
-          4,
-          97,
-          108,
-          116,
-          52,
-          192,
-          45
-        ]
-      }
-    },
-    {
-      "NAME": "dimension.dev",
-      "TYPE": 15,
-      "CLASS": 1,
-      "TTL": 3600,
-      "RDLENGTH": 9,
-      "RDATA": {
-        "type": "Buffer",
-        "data": [
           0,
-          5,
-          4,
-          97,
-          108,
-          116,
-          49,
-          192,
-          45
-        ]
-      }
-    },
-    {
-      "NAME": "dimension.dev",
-      "TYPE": 15,
-      "CLASS": 1,
-      "TTL": 3600,
-      "RDLENGTH": 9,
-      "RDATA": {
-        "type": "Buffer",
-        "data": [
+          39,
+          16,
           0,
-          5,
-          4,
-          97,
-          108,
-          116,
-          50,
-          192,
-          45
+          0,
+          9,
+          96,
+          0,
+          9,
+          58,
+          128,
+          0,
+          0,
+          7,
+          8
         ]
       }
     }
   ],
-  "questions": [
-    {
-      "NAME": "dimension.dev",
-      "TYPE": 15,
-      "CLASS": 1
-    }
-  ]
+  "additional": []
 }
