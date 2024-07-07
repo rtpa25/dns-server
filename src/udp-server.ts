@@ -16,8 +16,8 @@ const dnsCache = new DNSCache(redis);
 
 udpSocket.on('message', async (data: Buffer, remoteAddr: dgram.RemoteInfo) => {
 	try {
-		const reqHeaderPacket = dnsParser.header(data);
-		const { questions: reqQuestionPacket } = dnsParser.questionAndAnswer(data);
+		const { questions: reqQuestionPacket, header: reqHeaderPacket } =
+			dnsParser.parse(data);
 
 		if (reqQuestionPacket.length !== reqHeaderPacket.QDCOUNT) {
 			throw new Error(

@@ -12,17 +12,9 @@ export async function forwardResolver(
 
 		socket.on('message', (data, _rinfo) => {
 			try {
-				const header = dnsParser.header(data);
-				const message = dnsParser.questionAndAnswer(data);
-				const response: DNSObject = {
-					header,
-					answers: message.answers,
-					questions: message.questions,
-					authority: message.authority,
-					additional: message.additional,
-				};
+				const message = dnsParser.parse(data);
 				socket.close();
-				resolve(response);
+				resolve(message);
 			} catch (error) {
 				console.error('Error in forwardResolver:', error);
 				reject(error);

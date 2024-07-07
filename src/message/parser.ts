@@ -1,7 +1,7 @@
 import { DNSAnswer, DNSHeader, DNSQuestion } from './types';
 
 export class DNSParser {
-	public header(buffer: Buffer): DNSHeader {
+	private header(buffer: Buffer): DNSHeader {
 		const headerObject: DNSHeader = {
 			ID: buffer.readUInt16BE(0),
 			QR: (buffer.readUInt16BE(2) >> 15) & 0b1,
@@ -94,7 +94,8 @@ export class DNSParser {
 		return [answer, offset];
 	}
 
-	public questionAndAnswer(buffer: Buffer): {
+	public parse(buffer: Buffer): {
+		header: DNSHeader;
 		questions: DNSQuestion[];
 		answers: DNSAnswer[];
 		authority: DNSAnswer[];
@@ -108,10 +109,11 @@ export class DNSParser {
 		const authority: DNSAnswer[] = [];
 		const additional: DNSAnswer[] = [];
 
-		const questionsCount = buffer.readUInt16BE(4);
-		const answersCount = buffer.readUInt16BE(6);
-		const authorityCount = buffer.readUInt16BE(8);
-		const additionalCount = buffer.readUInt16BE(10);
+		const header = this.header(buffer);
+		const questionsCount = header.QDCOUNT;
+		const answersCount = header.ANCOUNT;
+		const authorityCount = header.NSCOUNT;
+		const additionalCount = header.ARCOUNT;
 
 		for (let i = 0; i < questionsCount; i++) {
 			let [question, newOffset] = this.decodeQuestion(buffer, offset);
@@ -137,7 +139,7 @@ export class DNSParser {
 			additional.push(answer);
 		}
 
-		return { questions, answers, authority, additional };
+		return { questions, answers, authority, additional, header };
 	}
 }
 

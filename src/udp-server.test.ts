@@ -58,7 +58,7 @@ test('valid DNS request with A record and sigle question', async () => {
 
 		udpSocket.on('message', (data: Buffer) => {
 			try {
-				const { answers } = dnsParser.questionAndAnswer(data);
+				const { answers } = dnsParser.parse(data);
 
 				expect(answers[0]?.NAME).toEqual(dnsRequestObject.questions[0]?.NAME);
 				expect(answers[0]?.CLASS).toEqual(1);
@@ -115,7 +115,7 @@ test('valid DNS request with CNAME record and sigle question should resolve unde
 
 		udpSocket.on('message', (data: Buffer) => {
 			try {
-				const { answers } = dnsParser.questionAndAnswer(data);
+				const { answers } = dnsParser.parse(data);
 
 				expect(answers).toBeDefined();
 				expect(answers.length).toEqual(2);
@@ -179,7 +179,7 @@ test('valid DNS request with CNAME record explicit asking of CNAME record should
 
 		udpSocket.on('message', (data: Buffer) => {
 			try {
-				const { answers } = dnsParser.questionAndAnswer(data);
+				const { answers } = dnsParser.parse(data);
 
 				expect(answers).toBeDefined();
 				expect(answers.length).toEqual(1);
@@ -238,12 +238,14 @@ test('invalid domain should give an NXDOMAIN rcode in header', async () => {
 
 		udpSocket.on('message', (data: Buffer) => {
 			try {
-				const { RCODE, ANCOUNT, NSCOUNT } = dnsParser.header(data);
+				const {
+					header: { RCODE, ANCOUNT, NSCOUNT },
+				} = dnsParser.parse(data);
 				expect(RCODE).toEqual(RCode.NXDOMAIN);
 				expect(ANCOUNT).toEqual(0);
 				expect(NSCOUNT).toEqual(1);
 
-				const { authority, answers } = dnsParser.questionAndAnswer(data);
+				const { authority, answers } = dnsParser.parse(data);
 
 				expect(authority).toBeDefined();
 				expect(authority.length).toEqual(1);
@@ -303,7 +305,7 @@ test('valid DNS request with NS record', async () => {
 
 		udpSocket.on('message', (data: Buffer) => {
 			try {
-				const { answers } = dnsParser.questionAndAnswer(data);
+				const { answers } = dnsParser.parse(data);
 
 				expect(answers).toBeDefined();
 				expect(answers.length).toEqual(2);

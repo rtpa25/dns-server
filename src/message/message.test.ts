@@ -39,22 +39,21 @@ test('check full builder and parser flow', () => {
 	const dnsBuilder = new DNSBuilder(dnsObject);
 	const buffer = dnsBuilder.toBuffer();
 
-	const reqHeaderPacket = dnsParser.header(buffer);
-	const { questions, answers } = dnsParser.questionAndAnswer(buffer);
+	const { questions, answers, header } = dnsParser.parse(buffer);
 
-	expect(reqHeaderPacket.ID).toEqual(dnsObject.header.ID);
-	expect(reqHeaderPacket.QR).toEqual(dnsObject.header.QR);
-	expect(reqHeaderPacket.OPCODE).toEqual(dnsObject.header.OPCODE);
-	expect(reqHeaderPacket.AA).toEqual(dnsObject.header.AA);
-	expect(reqHeaderPacket.TC).toEqual(dnsObject.header.TC);
-	expect(reqHeaderPacket.RD).toEqual(dnsObject.header.RD);
-	expect(reqHeaderPacket.RA).toEqual(dnsObject.header.RA);
-	expect(reqHeaderPacket.Z).toEqual(dnsObject.header.Z);
-	expect(reqHeaderPacket.RCODE).toEqual(dnsObject.header.RCODE);
-	expect(reqHeaderPacket.QDCOUNT).toEqual(dnsObject.header.QDCOUNT);
-	expect(reqHeaderPacket.ANCOUNT).toEqual(dnsObject.header.ANCOUNT);
-	expect(reqHeaderPacket.NSCOUNT).toEqual(dnsObject.header.NSCOUNT);
-	expect(reqHeaderPacket.ARCOUNT).toEqual(dnsObject.header.ARCOUNT);
+	expect(header.ID).toEqual(dnsObject.header.ID);
+	expect(header.QR).toEqual(dnsObject.header.QR);
+	expect(header.OPCODE).toEqual(dnsObject.header.OPCODE);
+	expect(header.AA).toEqual(dnsObject.header.AA);
+	expect(header.TC).toEqual(dnsObject.header.TC);
+	expect(header.RD).toEqual(dnsObject.header.RD);
+	expect(header.RA).toEqual(dnsObject.header.RA);
+	expect(header.Z).toEqual(dnsObject.header.Z);
+	expect(header.RCODE).toEqual(dnsObject.header.RCODE);
+	expect(header.QDCOUNT).toEqual(dnsObject.header.QDCOUNT);
+	expect(header.ANCOUNT).toEqual(dnsObject.header.ANCOUNT);
+	expect(header.NSCOUNT).toEqual(dnsObject.header.NSCOUNT);
+	expect(header.ARCOUNT).toEqual(dnsObject.header.ARCOUNT);
 
 	expect(questions).toHaveLength(1);
 	expect(questions[0]).toBeDefined();
