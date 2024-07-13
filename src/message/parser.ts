@@ -1,4 +1,4 @@
-import { DNSAnswer, DNSHeader, DNSQuestion } from './types';
+import { DNSAnswer, DNSHeader, DNSObject, DNSQuestion } from './types';
 
 export class DNSParser {
 	private header(buffer: Buffer): DNSHeader {
@@ -94,13 +94,7 @@ export class DNSParser {
 		return [answer, offset];
 	}
 
-	public parse(buffer: Buffer): {
-		header: DNSHeader;
-		questions: DNSQuestion[];
-		answers: DNSAnswer[];
-		authority: DNSAnswer[];
-		additional: DNSAnswer[];
-	} {
+	public parse(buffer: Buffer): DNSObject {
 		// header always takes up the first 12 bytes
 		let offset = 12;
 

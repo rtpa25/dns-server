@@ -7,7 +7,7 @@ export async function forwardResolver(
 	host: string,
 	port: number,
 ) {
-	const answer = (await new Promise((resolve, reject) => {
+	const answer = await new Promise<DNSObject>((resolve, reject) => {
 		const socket = dgram.createSocket('udp4');
 
 		socket.on('message', (data, _rinfo) => {
@@ -27,7 +27,7 @@ export async function forwardResolver(
 		});
 
 		socket.send(request, port, host);
-	})) as DNSObject;
+	});
 
 	return answer;
 }

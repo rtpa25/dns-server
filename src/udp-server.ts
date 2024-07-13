@@ -67,8 +67,6 @@ udpSocket.on('message', async (data: Buffer, remoteAddr: dgram.RemoteInfo) => {
 				await dnsCache.set(question, responseObject.answers);
 		}
 
-		fs.writeFileSync('response.json', JSON.stringify(responseObject, null, 2));
-
 		const dnsBuilder = new DNSBuilder(responseObject);
 		const response = dnsBuilder.toBuffer();
 

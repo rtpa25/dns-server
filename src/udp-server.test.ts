@@ -60,6 +60,9 @@ test('valid DNS request with A record and sigle question', async () => {
 			try {
 				const { answers } = dnsParser.parse(data);
 
+				expect(answers).toBeDefined();
+				if (!answers) return;
+
 				expect(answers[0]?.NAME).toEqual(dnsRequestObject.questions[0]?.NAME);
 				expect(answers[0]?.CLASS).toEqual(1);
 				expect(answers[0]?.TYPE).toEqual(RECORD_TYPE.A);
@@ -116,6 +119,9 @@ test('valid DNS request with CNAME record and sigle question should resolve unde
 		udpSocket.on('message', (data: Buffer) => {
 			try {
 				const { answers } = dnsParser.parse(data);
+
+				expect(answers).toBeDefined();
+				if (!answers) return;
 
 				expect(answers).toBeDefined();
 				expect(answers.length).toEqual(2);
@@ -182,6 +188,7 @@ test('valid DNS request with CNAME record explicit asking of CNAME record should
 				const { answers } = dnsParser.parse(data);
 
 				expect(answers).toBeDefined();
+				if (!answers) return;
 				expect(answers.length).toEqual(1);
 
 				expect(answers[0]?.NAME).toEqual(dnsRequestObject.questions[0]?.NAME);
@@ -248,12 +255,16 @@ test('invalid domain should give an NXDOMAIN rcode in header', async () => {
 				const { authority, answers } = dnsParser.parse(data);
 
 				expect(authority).toBeDefined();
+				if (!authority) return;
+
+				expect(authority).toBeDefined();
 				expect(authority.length).toEqual(1);
 				expect(authority[0]?.NAME).toEqual('ronit.dev');
 				expect(authority[0]?.CLASS).toEqual(1);
 				expect(authority[0]?.TYPE).toEqual(RECORD_TYPE.SOA);
 
 				expect(answers).toBeDefined();
+				if (!answers) return;
 				expect(answers.length).toEqual(0);
 
 				resolve(); // Resolve the promise when all assertions pass
@@ -308,6 +319,8 @@ test('valid DNS request with NS record', async () => {
 				const { answers } = dnsParser.parse(data);
 
 				expect(answers).toBeDefined();
+				if (!answers) return;
+
 				expect(answers.length).toEqual(2);
 
 				expect(answers[0]?.NAME).toEqual(dnsRequestObject.questions[0]?.NAME);

@@ -8,7 +8,6 @@ import {
 	RCode,
 	RECORD_TYPE,
 } from './types';
-import {} from 'module';
 
 test('check full builder and parser flow', () => {
 	const dnsObject: DNSObject = {
