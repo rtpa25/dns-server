@@ -1,5 +1,5 @@
-import { DNSAnswer, DNSQuestion } from './message/types';
 import { Redis } from '@upstash/redis';
+import { DNSAnswer, DNSQuestion } from './message/types';
 import { decodeRDATA } from './utils';
 
 export class DNSCache {

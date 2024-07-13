@@ -1,4 +1,6 @@
 import * as dgram from 'node:dgram';
+import { DNSBuilder } from './message/builder';
+import { dnsParser } from './message/parser';
 import {
 	Bool,
 	DNSObject,
@@ -7,8 +9,6 @@ import {
 	RCode,
 	RECORD_TYPE,
 } from './message/types';
-import { DNSBuilder } from './message/builder';
-import { dnsParser } from './message/parser';
 import { decodeRDATA } from './utils';
 
 const udpSocket = dgram.createSocket('udp4');

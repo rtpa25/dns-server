@@ -1,11 +1,10 @@
 import * as dgram from 'node:dgram';
-import * as fs from 'node:fs';
+import { DNSCache } from './dns-cache';
 import { DNSBuilder } from './message/builder';
 import { dnsParser } from './message/parser';
-import { recursiveLookup } from './reccursive-resolver';
-import { DNSCache } from './dns-cache';
-import { redis } from './redis';
 import { Bool, DNSObject, QRIndicator } from './message/types';
+import { recursiveLookup } from './recursive-resolver';
+import { redis } from './redis';
 
 const udpSocket: dgram.Socket = dgram.createSocket('udp4');
 udpSocket.bind(2053, '127.0.0.1');
