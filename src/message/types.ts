@@ -75,6 +75,25 @@ export enum RECORD_TYPE {
 	TXT = 16,
 }
 
+export enum RECORD_TYPE_STRING {
+	A = 'A',
+	NS = 'NS',
+	MD = 'MD',
+	MF = 'MF',
+	CNAME = 'CNAME',
+	SOA = 'SOA',
+	MB = 'MB',
+	MG = 'MG',
+	MR = 'MR',
+	NULL = 'NULL',
+	WKS = 'WKS',
+	PTR = 'PTR',
+	HINFO = 'HINFO',
+	MINFO = 'MINFO',
+	MX = 'MX',
+	TXT = 'TXT',
+}
+
 export interface DNSQuestion {
 	NAME: string; // The domain name, encoded as a sequence of labels. Each label consists of a length octet followed by that number of octets. The domain name is terminated with a length of 0. -- variable length
 
