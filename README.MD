@@ -59,7 +59,7 @@ pnpm test
 The HTTP server provides endpoints for querying DNS records. Here is an example of how to use it:
 
 ```sh
-curl -X GET "http://localhost:3000/resolve?domain=example.com&type=A"
+curl -X GET "http://localhost:8080/resolve?domain=www.ronit.dev&type=A"
 ```
 
 This will return the A record for `example.com`.
