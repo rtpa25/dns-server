@@ -203,7 +203,6 @@ test('valid DNS request with CNAME record explicit asking of CNAME record should
 		});
 	});
 
-	// Wait for the response promise to resolve or timeout after a certain period
 	await responsePromise;
 });
 test('invalid domain should give an NXDOMAIN rcode in header', async () => {
