@@ -1,6 +1,6 @@
 # Custom DNS Server
 
-This project is a fully functional DNS server built from scratch, featuring an HTTP client interface for querying specific domains and record types. The server includes custom logic for parsing and building UDP packets and can recursively resolve any domain.
+This project is a fully functional DNS server built from scratch, featuring an HTTP client interface for querying specific domains and record types. The server includes custom logic for parsing and building UDP packets and can recursively resolve any domain of your choice.
 
 ## Features
 
